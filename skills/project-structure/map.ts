@@ -6,7 +6,7 @@
 //                    [--include a,b,c] [--boundary x,y] [--include-tests] [--no-docs] [--fn-consts-only]
 //                    [--members] [--public-only]
 //
-// TS: parse-only (no type-checking) via the `typescript` package resolved from the target repo
+// TS: parse-only (no type-checking) via this skill dir's `typescript` (the target repo's copy only with PROJECT_STRUCTURE_TRUST_REPO=1)
 // or this skill dir; ~15k files in <10s. Swift: zero-dependency regex/brace-depth scanner.
 // Runs on Node >= 23.6 (type stripping); older Node: `npx tsx map.ts ...`.
 
@@ -77,7 +77,11 @@ function parseArgs(argv: string[]): Options {
 }
 
 function loadTypescript(repoRoot: string): any {
-  for (const from of [join(repoRoot, 'package.json'), import.meta.url]) {
+  // The skill's own copy comes first. Loading `typescript` out of the target repo runs that
+  // repo's code, so it only happens when the caller says the repo is trusted.
+  const sources = [import.meta.url];
+  if (process.env.PROJECT_STRUCTURE_TRUST_REPO === '1') sources.push(join(repoRoot, 'package.json'));
+  for (const from of sources) {
     try {
       return createRequire(from)('typescript');
     } catch {
@@ -85,7 +89,7 @@ function loadTypescript(repoRoot: string): any {
     }
   }
   console.error('Cannot resolve the `typescript` package from the target repo or the skill directory.');
-  console.error('Fix: run `npm i typescript` in either location.');
+  console.error('Fix: run `npm i typescript` in the skill directory, or set PROJECT_STRUCTURE_TRUST_REPO=1 to use the repo\'s own copy.');
   process.exit(2);
 }
 

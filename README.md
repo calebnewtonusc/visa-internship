@@ -36,3 +36,5 @@ The swift, xcode, cli, project-structure, profiling and github-review skills are
 folder). deslop is by Carlton Aikins (MIT). Everything else comes from Chewbacca.
 
 Built with Chewbacca
+
+All glory to God! ✝️❤️
